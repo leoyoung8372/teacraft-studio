@@ -15,3 +15,6 @@ export const cancel = (id) => request({ url: `/api/admin/orders/${id}/cancel`, m
 
 /** 历史订单 */
 export const listHistory = () => request({ url: '/api/admin/orders/history', method: 'GET' })
+
+/** 订单详情（含商品明细） */
+export const detail = (id) => request({ url: `/api/order/${id}`, method: 'GET' })

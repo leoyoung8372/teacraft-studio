@@ -4,14 +4,14 @@
       <!-- 侧栏 -->
       <el-aside width="200px" class="sidebar">
         <el-menu :default-active="route.path" router class="side-menu">
-          <el-menu-item index="/products">
-            <span>库存管理</span>
-          </el-menu-item>
           <el-menu-item index="/orders">
             <span>订单管理</span>
           </el-menu-item>
           <el-menu-item index="/order-history">
             <span>历史订单</span>
+          </el-menu-item>
+          <el-menu-item index="/products">
+            <span>库存管理</span>
           </el-menu-item>
         </el-menu>
       </el-aside>

@@ -21,7 +21,7 @@ const router = createRouter({
         { path: 'products', component: ProductManage },
         { path: 'orders', component: OrderManage },
         { path: 'order-history', component: OrderHistory },
-        { path: '', redirect: '/products' }
+        { path: '', redirect: '/orders' }
       ]
     }
   ]

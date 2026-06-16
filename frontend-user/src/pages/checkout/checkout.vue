@@ -13,6 +13,7 @@
         </view>
         <text class="item-qty">x{{ item.quantity }}</text>
         <text class="item-price">￥{{ item.subtotal.toFixed(2) }}</text>
+        <text class="item-del" @tap.stop="handleRemove(item.cartItemId)">✕</text>
       </view>
     </view>
 
@@ -60,7 +61,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { list as listCart } from '@/api/cart'
+import { list as listCart, remove } from '@/api/cart'
 import { create as createOrder } from '@/api/order'
 import { list as listAddress } from '@/api/address'
 
@@ -75,16 +76,25 @@ const submitting = ref(false)
 
 const total = computed(() => cartItems.value.reduce((s, i) => s + i.subtotal, 0))
 
-onMounted(async () => {
+const fetchCart = async () => {
   const cartRes = await listCart()
   cartItems.value = cartRes.data
+}
+
+onMounted(async () => {
+  await fetchCart()
   const addrRes = await listAddress()
   addresses.value = addrRes.data
-  // 默认选中第一个地址
   if (addresses.value.length > 0) {
     selectedAddrId.value = addresses.value[0].id
   }
 })
+
+// 删除购物车商品
+const handleRemove = async (id) => {
+  await remove(id)
+  fetchCart()
+}
 
 const handleSubmit = async () => {
   if (cartItems.value.length === 0) {
@@ -167,6 +177,14 @@ const handleSubmit = async () => {
   font-size: 28rpx;
   font-weight: bold;
   color: #333;
+}
+.item-del {
+  font-size: 32rpx;
+  color: #ccc;
+  padding: 0 8rpx;
+}
+.item-del:active {
+  color: #e74c3c;
 }
 
 /* 用餐方式 */

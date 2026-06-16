@@ -37,7 +37,8 @@ const handleLogin = async () => {
     uni.setStorageSync('userInfo', {
       userId: res.data.userId,
       nickname: res.data.nickname,
-      avatarUrl: res.data.avatarUrl
+      avatarUrl: res.data.avatarUrl,
+      phone: phone.value  // 保存手机号
     })
     uni.showToast({ title: '登录成功', icon: 'success' })
     // 跳转到主页

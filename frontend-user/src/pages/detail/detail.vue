@@ -48,13 +48,23 @@
 
     <!-- 底部操作栏 -->
     <view class="bottom-bar">
-      <view class="quantity-stepper">
-        <text class="qty-btn" @tap="qty > 1 && qty--">−</text>
-        <text class="qty-val">{{ qty }}</text>
-        <text class="qty-btn" @tap="qty++">+</text>
+      <!-- 上排：金额 + 数量 -->
+      <view class="top-row">
+        <text class="total-price">￥{{ (product.price * qty).toFixed(2) }}</text>
+        <view class="quantity-stepper">
+          <text class="qty-btn" @tap="qty > 1 && qty--">−</text>
+          <text class="qty-val">{{ qty }}</text>
+          <text class="qty-btn" @tap="qty++">+</text>
+        </view>
       </view>
-      <view class="add-btn" @tap="handleAdd">
-        <text>加入购物车 ￥{{ (product.price * qty).toFixed(2) }}</text>
+      <!-- 下排：两个按钮 -->
+      <view class="btn-row">
+        <view class="cart-btn" @tap="handleAdd">
+          <text>加入购物车</text>
+        </view>
+        <view class="buy-btn" @tap="handleBuyNow">
+          <text>立即购买</text>
+        </view>
       </view>
     </view>
   </view>
@@ -110,9 +120,22 @@ const handleAdd = async () => {
     })
     uni.showToast({ title: '已加入购物车', icon: 'success' })
     setTimeout(() => uni.navigateBack(), 500)
-  } catch (e) {
-    // 错误在 request.js 中处理
-  }
+  } catch (e) {}
+}
+
+// 立即购买：加入购物车后直接跳结算页
+const handleBuyNow = async () => {
+  try {
+    await add({
+      productId: product.value.id,
+      quantity: qty.value,
+      sweetness: form.value.sweetness || null,
+      temperature: form.value.temperature || null,
+      cupSize: form.value.cupSize || null,
+      addOns: selectedAddOns.value.length > 0 ? selectedAddOns.value.join(',') : null
+    })
+    uni.navigateTo({ url: '/pages/checkout/checkout' })
+  } catch (e) {}
 }
 </script>
 
@@ -187,16 +210,24 @@ const handleAdd = async () => {
   bottom: 0;
   left: 0;
   right: 0;
-  display: flex;
-  align-items: center;
   background: #fff;
-  padding: 16rpx 24rpx;
+  padding: 16rpx 24rpx 20rpx;
   box-shadow: 0 -2rpx 12rpx rgba(0,0,0,0.06);
+}
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.total-price {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #e74c3c;
 }
 .quantity-stepper {
   display: flex;
   align-items: center;
-  margin-right: 24rpx;
 }
 .qty-btn {
   width: 56rpx;
@@ -212,9 +243,24 @@ const handleAdd = async () => {
   font-size: 30rpx;
   font-weight: bold;
 }
-.add-btn {
+.btn-row {
+  display: flex;
+  gap: 20rpx;
+}
+.cart-btn {
   flex: 1;
-  background: #07c160;
+  background: #fff;
+  border: 2rpx solid #333;
+  border-radius: 44rpx;
+  padding: 20rpx;
+  text-align: center;
+  color: #333;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+.buy-btn {
+  flex: 1;
+  background: #e74c3c;
   border-radius: 44rpx;
   padding: 20rpx;
   text-align: center;

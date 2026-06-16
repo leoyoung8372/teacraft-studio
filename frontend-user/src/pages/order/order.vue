@@ -23,7 +23,7 @@
         />
         <view class="product-info">
           <text class="product-name">{{ prod.name }}</text>
-          <text class="product-desc">{{ prod.description || '暂无简介' }}</text>
+          <text class="product-desc">{{ truncate(prod.description) }}</text>
           <text class="product-price">￥{{ prod.price }}</text>
         </view>
       </view>
@@ -83,6 +83,12 @@ onShow(() => {
   fetchCart()
 })
 
+// 截断文字：超过10字显示省略号
+const truncate = (text) => {
+  if (!text) return '暂无简介'
+  return text.length > 10 ? text.substring(0, 10) + '...' : text
+}
+
 // 跳转结算页
 const goCheckout = () => {
   uni.navigateTo({ url: '/pages/checkout/checkout' })
@@ -124,7 +130,7 @@ const fetchProducts = async () => {
 <style scoped>
 .order-page {
   display: flex;
-  height: 100%;
+  height: 100vh;
 }
 
 /* ===== 左侧分类 ===== */

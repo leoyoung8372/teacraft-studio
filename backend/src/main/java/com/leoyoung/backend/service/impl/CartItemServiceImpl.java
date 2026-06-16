@@ -1,6 +1,8 @@
 package com.leoyoung.backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.leoyoung.backend.common.ResultCode;
+import com.leoyoung.backend.common.exception.BusinessException;
 import com.leoyoung.backend.dto.CartAddRequest;
 import com.leoyoung.backend.dto.CartItemResponse;
 import com.leoyoung.backend.entity.CartItem;
@@ -30,6 +32,12 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public void add(Long userId, CartAddRequest request) {
+        // 校验库存：加购前检查商品是否存在、是否上架、库存是否充足
+        Product product = productMapper.selectById(request.getProductId());
+        if (product == null || product.getIsOnSale() != 1) {
+            throw new BusinessException(ResultCode.NOT_FOUND, "商品已下架或不存在");
+        }
+
         // 查询用户购物车中是否已有同商品+同规格的记录
         LambdaQueryWrapper<CartItem> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CartItem::getUserId, userId)
@@ -41,11 +49,20 @@ public class CartItemServiceImpl implements CartItemService {
         CartItem existing = cartItemMapper.selectOne(wrapper);
 
         if (existing != null) {
-            // 已存在 → 累加数量
-            existing.setQuantity(existing.getQuantity() + request.getQuantity());
+            // 已存在 → 累加数量前校验总数量不超过库存
+            int newQty = existing.getQuantity() + request.getQuantity();
+            if (newQty > product.getStock()) {
+                throw new BusinessException(ResultCode.STOCK_INSUFFICIENT,
+                        "「" + product.getName() + "」库存不足，当前仅剩 " + product.getStock() + " 件");
+            }
+            existing.setQuantity(newQty);
             cartItemMapper.updateById(existing);
         } else {
-            // 不存在 → 新增
+            // 不存在 → 新增前校验数量不超过库存
+            if (request.getQuantity() > product.getStock()) {
+                throw new BusinessException(ResultCode.STOCK_INSUFFICIENT,
+                        "「" + product.getName() + "」库存不足，当前仅剩 " + product.getStock() + " 件");
+            }
             CartItem item = new CartItem();
             item.setUserId(userId);
             item.setProductId(request.getProductId());

@@ -2,6 +2,8 @@ package com.leoyoung.backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.leoyoung.backend.common.ResultCode;
+import com.leoyoung.backend.common.exception.BusinessException;
 import com.leoyoung.backend.dto.ProductSaveRequest;
 import com.leoyoung.backend.entity.Product;
 import com.leoyoung.backend.mapper.ProductMapper;
@@ -48,8 +50,20 @@ public class ProductServiceImpl implements ProductService {
         return productMapper.selectPage(new Page<>(page, size), wrapper);
     }
 
+    private static final Long RECOMMEND_CATEGORY_ID = 6L;
+    private static final int RECOMMEND_MAX = 10;
+
     @Override
     public void save(ProductSaveRequest request) {
+        // 推荐分类限制：最多 10 个商品（仅新增时校验）
+        if (request.getId() == null && RECOMMEND_CATEGORY_ID.equals(request.getCategoryId())) {
+            LambdaQueryWrapper<Product> countWrapper = new LambdaQueryWrapper<>();
+            countWrapper.eq(Product::getCategoryId, RECOMMEND_CATEGORY_ID);
+            if (productMapper.selectCount(countWrapper) >= RECOMMEND_MAX) {
+                throw new BusinessException(ResultCode.BAD_REQUEST, "推荐分类最多只能添加 10 个商品");
+            }
+        }
+
         Product product = new Product();
         product.setCategoryId(request.getCategoryId());
         product.setName(request.getName());

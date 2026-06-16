@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@/views/LoginView.vue'
 import HomeView from '@/views/HomeView.vue'
 import ProductManage from '@/views/ProductManage.vue'
+import OrderManage from '@/views/OrderManage.vue'
+import OrderHistory from '@/views/OrderHistory.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,7 +19,9 @@ const router = createRouter({
       // 子路由：后续在 router-view 中展示
       children: [
         { path: 'products', component: ProductManage },
-        { path: '', redirect: '/products' }  // 默认跳转库存管理
+        { path: 'orders', component: OrderManage },
+        { path: 'order-history', component: OrderHistory },
+        { path: '', redirect: '/products' }
       ]
     }
   ]
